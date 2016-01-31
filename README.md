@@ -34,7 +34,7 @@ Where `c-const-map` is a map of byte arrays with keys `{:c1 :c2 :c3 :c4 :c5}` an
 * `f4`
 * `f5*`
 
-You can use **test** module as an example of usage.
+You can use [**test**](test/threegpp/milenage_test.clj#L135) module as an example of usage.
 
 ## Current Implementation details
 Internally, for a bit arithmetic, module uses a [java.math.BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html)
