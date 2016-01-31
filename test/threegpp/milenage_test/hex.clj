@@ -1,5 +1,5 @@
-(ns org.roganov.hex
-  (:require [org.roganov.milenage.biginteger :as bigint]))
+(ns threegpp.milenage-test.hex
+  (:require [threegpp.milenage-clj.biginteger :as bigint]))
 
 
 (defn unhexlify
