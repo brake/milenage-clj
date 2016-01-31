@@ -10,29 +10,29 @@ A Clojure library designed to support [3GPP](http://www.3gpp.org)™ Milenage al
 
 ## Usage
 
-1. Create `cipher` [javax.crypto.Cipher](https://docs.oracle.com/javase/7/docs/api/javax/crypto/Cipher.html), it will act as a `K`
-```clojure
-(milenage-clj/create-rijndael-cipher k)
-```
+1. Create `cipher` [javax.crypto.Cipher](https://docs.oracle.com/javase/7/docs/api/javax/crypto/Cipher.html), it will act as representation of a ciphering key `K`
+  ```clojure
+  (milenage-clj/create-rijndael-cipher k)
+  ```
 
 2. Create a MilenageConstants record with sample (AKA "default") or your own values.
-```clojure
-milenage-clj/sample-milenage-constants  ; sample values
-(milenage-clj/milenage-constants c-const-map r-const-map)  ; your own values
-```
-Where `c-const-map` is a map of byte arrays with keys `{:c1 :c2 :c3 :c4 :c5}` and `r-const-map` is a map with byte values and keys `{:r1 :r2 :r3 :r4 :r5}` 
+  ```clojure
+  milenage-clj/sample-milenage-constants  ; sample values
+  (milenage-clj/milenage-constants c-const-map r-const-map)  ; your own values
+  ```
+  Where `c-const-map` is a map of byte arrays with keys `{:c1 :c2 :c3 :c4 :c5}` and `r-const-map` is a map with byte values and keys `{:r1 :r2 :r3 :r4 :r5}` 
 
 3. Calculate `OPc` from `OP` and `cipher`
-```clojure
-(milenage-clj/opc cipher op-bytes)
-```
+  ```clojure
+  (milenage-clj/opc cipher op-bytes)
+  ```
   
 4. Call appropriate Milenage function:
-* `f2-all` -> `:f1`, `:f1*`
-* `f2f5` -> `:f2`, `:f5`
-* `f3`
-* `f4`
-* `f5*`
+  * `f2-all` -> `:f1`, `:f1*`
+  * `f2f5` -> `:f2`, `:f5`
+  * `f3`
+  * `f4`
+  * `f5*`
 
 You can use [**test**](test/threegpp/milenage_test.clj#L135) module as an example of usage.
 
