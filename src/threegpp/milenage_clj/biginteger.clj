@@ -1,19 +1,21 @@
-(ns org.roganov.milenage.biginteger
+(ns threegpp.milenage-clj.biginteger
   ^{:author "Constantin Roganov"}
-  (:require ;[org.roganov.aes.hex :as hex]
-            [org.roganov.milenage.aes :as aes128])
+  (:require [threegpp.milenage-clj.rijndael :as rijndael])
   (:use [clojure.string :only [join]])
-  (:import [java.math BigInteger]))
+  (:import [java.math BigInteger]
+           [javax.crypto Cipher]))
 
+(def ^:const block-size-bytes 16)
+(def ^:const block-size-bits (* block-size-bytes 8))
 
 (def ^{:private true :const true} all-ones (->
-                                 (repeat aes128/block-size-bytes "FF")
+                                 (repeat block-size-bytes "FF")
                                  join
                                  (BigInteger. 16)))
 
 (defn ensure-unsigned
   "Turns the negative value of argument to positive one"
-  [^BigInteger i & {:keys [bit-length] :or {bit-length aes128/block-size-bits}}]
+  [^BigInteger i & {:keys [bit-length] :or {bit-length block-size-bits}}]
   {:pre [(pos? bit-length)]}
   (if (neg? i)
     (-> BigInteger/ONE
@@ -27,15 +29,14 @@
   {:pre [(>= n 0)]}
   (.setBit BigInteger/ZERO n))
 
-(def print-full nil)
 (defn left-circ-rotation
   "Circular left bit rotation (Left bitwise rotating shift)"
   [^BigInteger i n]
   {:pre [(>= n 0)]}
   (if-not (zero? n)
-    (let [i (ensure-unsigned i)
+    (let [^BigInteger i (ensure-unsigned i)
           sl (.shiftLeft i n)
-          rev-shift (- aes128/block-size-bits n)
+          rev-shift (- block-size-bits n)
           sr (.shiftRight i rev-shift)
           comb-lr (.or sl sr)
           clean-result (.and comb-lr all-ones)]
@@ -45,7 +46,9 @@
 (defn xor
   "Perform Exclusive OR (XOR) of arguments"
   [^BigInteger x ^BigInteger y]
-  (apply #(.xor %1 %2) (map ensure-unsigned [x y])))
+  (apply (fn [^BigInteger n1 ^BigInteger n2]
+           (.xor n1 n2))
+         (map ensure-unsigned [x y])))
 
 (defn xor-all
   "Exclusive OR of all BigInteger arguments"
@@ -55,9 +58,10 @@
 (defn to-byte-block
   "Turns a BigInteger into array of bytes with size equivalent to required
   block size"
-  [^BigInteger i & {:keys [block-size] :or {block-size aes128/block-size-bytes}}]
+  [^BigInteger i & {:keys [block-size] :or {block-size block-size-bytes}}]
   {:pre [(pos? block-size)]}
-  (let [buf (-> i ensure-unsigned .toByteArray)
+  (let [^BigInteger i (ensure-unsigned i)
+        ^bytes buf (.toByteArray i)               ; reflection (-> i ensure-unsigned .toByteArray)
         delta (->> buf alength (- block-size))]
     (cond
       (pos? delta)
@@ -73,23 +77,19 @@
       :else
         buf)))
 
-(defn aes-encrypt
-  "BigInteger to byte array wrapper for aes/ functions"
-  [^BigInteger k ^BigInteger plain]
-  (->> [k plain]
-       (map to-byte-block)
-       (apply aes128/encrypt-ecb)
+(defn rijndael-encrypt
+  "BigInteger to byte array wrapper for rijndael/ functions"
+  [^Cipher cipher ^BigInteger plain]
+  (->> plain
+       to-byte-block
+       ^bytes (rijndael/encrypt cipher)
        BigInteger.
        ensure-unsigned))
 
-(defn aes-decrypt
-  "BigInteger to byte array wrapper for aes/ functions"
-  [^BigInteger k ^BigInteger cipher]
-  (->> [k cipher]
-       (map to-byte-block)
-       (apply aes128/decrypt-ecb)
-       BigInteger.
-       ensure-unsigned))
+(defn unhexlify
+  "Creates BigInteger from a hex string"
+  [^String hs]
+  (BigInteger. hs 16))
 
 (defn from-bytes
   "Turns an array of bytes to BigIngeger"
@@ -100,7 +100,7 @@
        (map (partial format "%02X"))
        (cons "00")
        (apply str)
-       (#(BigInteger. % 16))))
+       unhexlify))
 
 ;(defn hexlify
 ;  "Turns BinIngeger value into hex string (sometimes gives defferent result
