@@ -1,3 +1,5 @@
+![Clojars Project](https://img.shields.io/clojars/v/threegpp.milenage-clj.svg)
+
 # threegpp.milenage-clj
   
 A Clojure library designed to support [3GPP](http://www.3gpp.org)™ Milenage algorithm calculations according to 3GPP TS 35.206. 
