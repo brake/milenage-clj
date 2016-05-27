@@ -1,4 +1,4 @@
-![Clojars Project](https://img.shields.io/clojars/v/threegpp.milenage-clj.svg)
+![Clojars Project](https://img.shields.io/clojars/v/threegpp.milenage-clj.svg) [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
 # threegpp.milenage-clj
   
